@@ -1,0 +1,228 @@
+<head>
+		
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	
+	<style>
+
+	canvas {
+	border: 2px solid #28b0ff;	
+	background-color: #f1f1f1;
+	}
+
+	</style>
+	
+	</head>
+	<body onload="startGame()">
+	<br></br>
+	
+	<!--Ubicar barco-->
+	<p>Ingrese las coordenadas en X y Y donde desea posicionar su barco</p>
+	<input id = "coorX" type="number" min="0" max="10" required">
+	<input id = "coorY" type="number" min="0" max="10" required"> 	
+	<br></br>
+	<p>¿Que tipo de barco es y en que direccion esta?</p>
+	<input id = "tipoBarco" type="number" min="0" max="5" required">
+	<input id= "direccionBarco" type="number" min="0" max="1" required>
+	<button id="boton" onclick="crearBarco()">OK!</button> 
+	
+	<!--Disparar-->
+	<br></br>	
+	<p>Introduzca las coordenadas donde desea disparar</P>	
+	<input id = "dispX" type="number" min="0" max="10" required">
+	<input id = "dispY" type="number" min="0" max="10" required"> 	
+	<button id="boton2" onclick="disparar()">Disparar!</button> 
+
+	<button id="boton3" onclick="informacionBarcos()">Oprimeme :)!</button> 
+	
+	<button id="botonDePruebas" onclick="claseDePruebas()">Pruebame!</button> 
+	
+	
+	<p id="pruebas"></p>
+	<p id="pruebas2"></p>
+	
+		<script>
+		
+		//canvas
+		var ancho = 550;
+		var alto = 550;
+		
+		//Arrays
+		var Bx = [];
+		var By = [];
+		var LargoBArray = [];
+		var DireccionBarcos = [];
+		
+		//Variables
+		var direccionB;
+		var tc;
+		var tamanioLinX;
+		var tamanioLinY;
+		var temp = 0; 
+		var largoB;
+		var limX;
+		var limY;
+				
+		var myGameArea = {
+			canvas : document.createElement("canvas"),
+			start : function() {
+			this.canvas.width = ancho;
+			this.canvas.height = alto;
+			this.context = this.canvas.getContext("2d");
+			document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+			}
+		}
+
+		function startGame() {
+		myGameArea.start();
+		
+		new Tablero(550, 550,50);
+		}
+				
+		
+		function Tablero(tamanioLineasX, tamanioLineasY, tamanioCeldas){
+		
+			tc = tamanioCeldas;
+			tamanioLinX = tamanioLineasX;
+			tamanioLinY = tamanioLineasY;
+			
+			linea = myGameArea.context;		
+			
+			//lineas 
+			for(var i = 0; i < 100; i++){
+			
+				//horizontal
+				linea.moveTo(tamanioCeldas*i, 0);
+				linea.lineTo(tamanioCeldas*i, tamanioLineasY);
+				linea.stroke();				
+				//vertical
+				linea.moveTo(0, tamanioCeldas*i);
+				linea.lineTo(tamanioLineasX, tamanioCeldas*i);
+				linea.stroke();
+			}			
+		}
+
+		function Barco(ancho, alto, color, posicionX, posicionY) {
+		
+			this.width = ancho;
+			this.height = alto;
+			this.x = posicionX;
+			this.y = posicionY;
+			
+			cuadrado = myGameArea.context;
+			cuadrado.fillStyle = color;
+			cuadrado.fillRect(this.x, this.y, this.width, this.height);
+		} 
+		
+		function crearBarco(){
+		
+			if(temp <= 4){
+			
+				var corX = document.getElementById("coorX").value;
+				var corY = document.getElementById("coorY").value;
+				
+				largoB = document.getElementById("tipoBarco").value;
+				direccionB = document.getElementById("direccionBarco").value;
+				
+				
+					
+				limX = Number(corX) + Number(largoB);
+				limY = Number(corY) + Number(largoB);
+				
+				//limitesTablero
+				if( (direccionB == 0 && corX >= 1 && limX <= (tamanioLinX/tc)+1 && corY >= 1 && corY <= (tamanioLinY/tc))
+					|| (direccionB == 1 && corY >= 1 && limY <= (tamanioLinY/tc)+1 && corX >= 1 && corX <= (tamanioLinX/tc))){
+						  
+						if(direccionB == 0)	
+							myGamePiece = new Barco(tc*largoB, tc, "black", (corX-1)*tc, (corY-1)*tc);	//horizontal
+						else 
+							if(direccionB == 1)
+								myGamePiece = new Barco(tc, tc*largoB, "black", (corX-1)*tc, (corY-1)*tc); //vertical
+								
+						Bx[temp] = corX;
+						By[temp] = corY;
+						LargoBArray[temp] = largoB;
+						DireccionBarcos[temp] = direccionB;		
+							
+						temp++; //Numero de barco		
+				}		
+				else
+					 alert("la posicion del barco sobrepasa los limites del tablero") 
+					
+				
+			}
+		}
+		
+		function disparar(){
+				
+				var dispX = document.getElementById("dispX").value;
+				var dispY = document.getElementById("dispY").value;				
+				document.getElementById("pruebas2").innerHTML = dispX + ", " + dispY; //--> probar disparo
+				
+			for(var i = 0; i < 5; i++)
+			{
+				cuadro = myGameArea.context;
+					
+						if( DireccionBarcos[i] == 0 && dispX >= Number(Bx[i]) && dispX <= Number(Bx[i])-1 + Number(LargoBArray[i]) )
+						{
+							if( dispY == Number(By[i]))
+							{					
+								document.getElementById("pruebas").innerHTML = "Boom!!!";
+									cuadro.fillStyle = "#ff007b";
+									cuadro.fillRect((dispX-1)*tc, (dispY-1)*tc, tc, tc);
+								break;
+							}
+							else{
+								document.getElementById("pruebas").innerHTML = "fallo!!!";
+									cuadro.fillStyle = "#00ffd8";
+									cuadro.fillRect((dispX-1)*tc, (dispY-1)*tc, tc, tc);
+							}
+							
+						}
+						else{
+							if( DireccionBarcos[i] == 1 && dispY >= Number(By[i]) && dispY <= Number(By[i])-1 + Number(LargoBArray[i]) )
+							{
+								if(dispX == Number(Bx[i]))
+								{ 
+									document.getElementById("pruebas").innerHTML = "Boom!!!";
+										cuadro.fillStyle = "#ff007b";
+										cuadro.fillRect((dispX-1)*tc, (dispY-1)*tc, tc, tc);
+									break;
+								}
+								else{
+									document.getElementById("pruebas").innerHTML = "fallo!!!";
+										cuadro.fillStyle = "#00ffd8";
+										cuadro.fillRect((dispX-1)*tc, (dispY-1)*tc, tc, tc);
+								}
+							}
+						
+							document.getElementById("pruebas").innerHTML = "fallo!!!";
+								cuadro.fillStyle = "#00ffd8";
+								cuadro.fillRect((dispX-1)*tc, (dispY-1)*tc, tc, tc);
+						}
+			}
+		}	
+			
+			
+		function informacionBarcos(){	
+			
+			for(var i = 0; i < 5; i++){
+			console.log("Barco #" + (i+1));
+			console.log("Bx[" + i + "]=" + Bx[i]);
+			console.log("By[" + i + "]=" + By[i]);
+			console.log("largo del barco: " + LargoBArray[i]);
+			if(DireccionBarcos[i] == 0)
+				console.log("Direccion del barco: horizontal");		
+			else 
+				if(DireccionBarcos[i] == 1)
+					console.log("Direccion del barco: vertical");	
+			console.log("");	//enter despues de cada impresion	
+			}
+		}	
+		
+		function claseDePruebas(){
+			
+			console.log(Number(  (Number(By[0]) + Number(LargoBArray[0])+1)));
+		}
+		</script>
+	</body>
+</html>
